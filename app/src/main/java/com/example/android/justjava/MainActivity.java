@@ -12,8 +12,13 @@ package com.example.android.justjava;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.text.NumberFormat;
 
@@ -35,33 +40,68 @@ public class MainActivity extends AppCompatActivity {
      */
 
     public void submitOrder(View view) {
-        display(quantity);
-        displayPrice (quantity * 5);
+        CheckBox whippedCreamCheckbox = (CheckBox) findViewById(R.id.whipped_cream_checkbox);
+        boolean hasWhippedCream = whippedCreamCheckbox.isChecked();
+        CheckBox chocolateCheckbox = (CheckBox) findViewById(R.id.chocolate_checkbox);
+        boolean hasChocolate = chocolateCheckbox.isChecked();
+        EditText usersName = (EditText) findViewById(R.id.name_field);
+        String nameOfUser = usersName.getText().toString();
+        int price = calculatePrice();
+        String priceMessage = createOrderSummary(price, hasWhippedCream, hasChocolate, nameOfUser);
+        displayMessage(priceMessage);
     }
 
-    public void increment(View view) {
-        quantity = quantity + 1;
-        display(quantity);
-    }
-
-    public void decrement(View view) {
-        quantity = quantity / 2;
-        display(quantity);
-    }
 
     /**
      * This method displays the given quantity value on the screen.
      */
-    private void display(int number) {
+    private void displayQuantity(int numberOfCoffees) {
         TextView quantityTextView = (TextView) findViewById(R.id.quantity_text_view);
-        quantityTextView.setText("" + number);
+        quantityTextView.setText("" + numberOfCoffees);
     }
 
     /**
-     * This method displays the given price on the screen.
+     * Calculates the price of the order.
+     *
+     * param quantity  is the number of cups of coffee ordered
      */
-    private void displayPrice(int number) {
-        TextView priceTextView = (TextView) findViewById(R.id.price_text_view);
-        priceTextView.setText(NumberFormat.getCurrencyInstance().format(number));
+
+    private int calculatePrice() {
+        int price = quantity * 5;
+        return price;
     }
+
+    public void increment(View view) {
+        quantity = quantity + 1;
+        displayQuantity(quantity);
+    }
+
+    public void decrement(View view) {
+        quantity = quantity / 2;
+        displayQuantity(quantity);
+    }
+
+    /**displays message to screen  */
+
+    private void displayMessage (String message) {
+        TextView orderSummaryTextView = (TextView) findViewById(R.id.order_summary_text_view);
+        orderSummaryTextView.setText(message);
+    }
+
+
+    /**
+     * This method displays the given price on the screen, as well as the user's name, true/false booleans
+     * for whipped cream and chocolate, the quantity, and a thank you message
+     */
+    private String createOrderSummary(int price, boolean addWhippedCream, boolean addChocolate, String nameOfUser) {
+        String priceMessage = "\nName: " + nameOfUser;
+        priceMessage = priceMessage + "\nAdd whipped cream?: " + addWhippedCream;
+        priceMessage = priceMessage + "\nAdd chocolate?: " + addChocolate;
+        priceMessage = priceMessage + "\nQuantity: " + quantity;
+        priceMessage = priceMessage + "\nTotal: $" + price;
+        priceMessage = priceMessage+ "\nThank you!";
+        return priceMessage;
+    }
+
+
 }
