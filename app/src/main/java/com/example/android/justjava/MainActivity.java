@@ -10,6 +10,8 @@ package com.example.android.justjava;
 
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -35,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+
+
     /**
      * This method is called when the order button is clicked.
      */
@@ -42,13 +47,25 @@ public class MainActivity extends AppCompatActivity {
     public void submitOrder(View view) {
         CheckBox whippedCreamCheckbox = (CheckBox) findViewById(R.id.whipped_cream_checkbox);
         boolean hasWhippedCream = whippedCreamCheckbox.isChecked();
+
         CheckBox chocolateCheckbox = (CheckBox) findViewById(R.id.chocolate_checkbox);
         boolean hasChocolate = chocolateCheckbox.isChecked();
+
         EditText usersName = (EditText) findViewById(R.id.name_field);
         String nameOfUser = usersName.getText().toString();
-        int price = calculatePrice();
+
+        int price = calculatePrice(hasWhippedCream, hasChocolate);
+
         String priceMessage = createOrderSummary(price, hasWhippedCream, hasChocolate, nameOfUser);
-        displayMessage(priceMessage);
+//        displayMessage(priceMessage);
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Yo, coffee order for " + nameOfUser+ "!");
+        intent.putExtra(Intent.EXTRA_TEXT, priceMessage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
 
@@ -66,18 +83,36 @@ public class MainActivity extends AppCompatActivity {
      * param quantity  is the number of cups of coffee ordered
      */
 
-    private int calculatePrice() {
-        int price = quantity * 5;
-        return price;
+    private int calculatePrice(boolean hasWhippedCream, boolean hasChocolate ) {
+        int basePrice = 5;
+
+        if (hasWhippedCream) {
+            basePrice = basePrice + 1;
+        }
+
+        if (hasChocolate) {
+            basePrice = basePrice + 2;
+        }
+
+        return quantity * basePrice;
+
     }
 
     public void increment(View view) {
         quantity = quantity + 1;
+        if (quantity > 100) {
+            Toast.makeText(this, "You can't order more than 100 coffees!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         displayQuantity(quantity);
     }
 
     public void decrement(View view) {
         quantity = quantity / 2;
+        if (quantity < 1) {
+            Toast.makeText(this, "You need to order at least 1 coffee...", Toast.LENGTH_SHORT).show();
+            return;
+        }
         displayQuantity(quantity);
     }
 
